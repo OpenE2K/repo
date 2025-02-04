@@ -62,7 +62,8 @@ EOF
     sed -i '/agetty/d' $TARGET/etc/inittab
     echo "deb [trusted=yes] $DEF_MIRROR $SUITE main" > $TARGET/etc/apt/sources.list
 
-    rm $TARGET/etc/rcsysinit.d/*mountfs \
+    rm -f \
+       $TARGET/etc/rcsysinit.d/*mountfs \
        $TARGET/etc/rcsysinit.d/*check_rootfs \
        $TARGET/etc/rcsysinit.d/*checkfs
 }

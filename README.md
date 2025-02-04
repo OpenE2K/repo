@@ -74,6 +74,5 @@ sudo cp /usr/local/bin/qemu-e2k $TARGET/usr/local/bin/qemu-e2k
 Enter into the chroot and finish the instalation process.
 
 ```sh
-# It will take a while (3-9 minutes) because emulating e2k is not a simple task...
 PATH="/sbin:/usr/sbin:/bin:/usr/bin" sudo chroot $TARGET /debootstrap/debootstrap --second-stage
 ```

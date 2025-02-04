@@ -53,7 +53,7 @@ $ sudo debootstrap --foreign --arch=e2k-8c elbrus-linux $TARGET https://setwd.ws
 $ sudo debootstrap --foreign --arch=e2k-8c elbrus-linux $TARGET file:///repo/elbrus-linux
 ```
 
-# Second stage
+## Second stage
 
 Copy the qemu-e2k static binary to the chroot directory.
 

@@ -64,6 +64,9 @@ if [[ -z "${version}" ]]; then
     exit 1
 fi
 
+codename="${version}"
+suite="${version}"
+
 repodir="${rootdir}/${version}"
 distdir="${repodir}/dists/${suite}"
 pooldir="pool"
@@ -100,7 +103,6 @@ echo "   Version: ${version}"
 echo "      Arch: ${arch_list[@]}"
 echo "Repository: ${repodir}"
 echo " Component: ${component_list[@]}"
-echo
 
 for component in ${component_list[@]}; do
     component_dir="${pooldir}/${component}"
@@ -114,7 +116,7 @@ for component in ${component_list[@]}; do
         echo "Scaning ${component_arch_dir}..."
         binary_dir=${distdir}/${component}/binary-${arch}
         output=${binary_dir}/Packages
-        mkdir -p ${binary_dir}
+        mkdir -vp "${binary_dir}"
         dpkg-scanpackages --multiversion --arch ${arch} ${component_dir} > ${output}
     done
 done

@@ -28,7 +28,8 @@ for version in ${version_list[@]}; do
     distdir="${repodir}/dists/${suite}"
     pooldir="pool"
 
-    cd ${distdir}
+    mkdir -vp "${distdir}"
+    cd "${distdir}"
 
     arch_list=($(find -type d -name 'binary-*' -printf '%f\n' | sort -u | cut -c8-))
     component_list=($(find -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort))

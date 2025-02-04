@@ -5,7 +5,7 @@ git clone --depth=1 -b e2k https://git.mentality.rip/OpenE2K/qemu-e2k.git
 mkdir -p qemu-e2k/build
 cd qemu-e2k/build
 ../configure --target-list=e2k-linux-user --static --disable-capstone --disable-werror
-nice ninja
+nice ninja qemu-e2k
 sudo cp qemu-e2k /usr/local/bin
 ```
 

@@ -40,6 +40,14 @@ sudo systemctl restart systemd-binfmt.service
 echo ':qemu-e2k:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xaf\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/local/bin/qemu-e2k:OC' | sudo tee /proc/sys/fs/binfmt_misc/register
 ```
 
+# Install debootstrap scripts
+
+```sh
+git clone --depth=1 https://git.mentality.rip/OpenE2K/repo.git
+cd repo
+sudo ln -svf $PWD/debootstrap/scripts/* /usr/share/debootstrap/scripts
+```
+
 # Setup chroot
 
 ## First stage
@@ -48,8 +56,9 @@ Prepare a chroot directory.
 
 ```sh
 # Set path to chroot directory
-TARGET=/elbrus
-# fetch and extract packages from remote repository
+export TARGET=/elbrus
+sudo mkdir -p $TARGET
+# Fetch and extract packages from remote repository
 sudo debootstrap --foreign --arch=e2k-8c elbrus-linux-8.2 $TARGET
 ```
 
@@ -65,6 +74,6 @@ sudo cp /usr/local/bin/qemu-e2k $TARGET/usr/local/bin/qemu-e2k
 Enter into the chroot and finish the instalation process.
 
 ```sh
-# this will take a while because emulating e2k is not a simple task...
-PATH="/sbin:/usr/sbin:/bin:/usr/bin" chroot $TARGET /debootstrap/debootstrap --second-stage
+# It will take a while (3-9 minutes) because emulating e2k is not a simple task...
+PATH="/sbin:/usr/sbin:/bin:/usr/bin" sudo chroot $TARGET /debootstrap/debootstrap --second-stage
 ```

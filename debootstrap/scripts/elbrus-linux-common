@@ -1,0 +1,68 @@
+# shellcheck shell=sh
+
+export SUITE="${SUITE#elbrus-linux-*}"
+
+default_mirror https://setwd.ws/osl/$SUITE
+mirror_style release
+download_style apt var-state
+
+work_out_debs () {
+    #required="glibc distro-release dpkg apt ncurses zlib bash attr bzip2 readline diffutils linux-pam shadow libtirpc openssl cracklib lfs-bootscripts cpio util-linux kmod eudev file acl coreutils kbd gnupg e2fsprogs ed findutils gawk grep gzip hdparm less patch pciutils tar procps-ng sed sysklogd sysvinit time libusb libusb-compat usbutils which vim xz netbase libpcap popt m4 libffi python perl elfutils net-tools iproute2 openssh libssh2"
+    required="fs-init glibc dpkg apt ncurses zlib bash attr bzip2 readline diffutils shadow cracklib lfs-bootscripts cpio file acl coreutils ed findutils gawk grep gzip less tar sed sysklogd sysvinit time which xz popt m4 libffi"
+    case "$SUITE" in
+        "3.0")
+            ;;
+        *)
+            required="$required distro-release eudev nano procps-ng"
+            ;;
+    esac
+}
+
+first_stage_install () {
+    # Workaround for duplicated files in packages.
+    EXTRACT_DEB_TAR_OPTIONS="$EXTRACT_DEB_TAR_OPTIONS --skip-old-files"
+
+    mkdir -p $TARGET/var/lib/dpkg/updates
+    mkdir -p $TARGET/var/lib/dpkg/info
+    touch $TARGET/var/lib/dpkg/status
+    touch $TARGET/var/lib/dpkg/available
+
+    mkdir $TARGET/lib64
+    mkdir -p $TARGET/usr/lib64
+    ln -s -r $TARGET/lib64 $TARGET/lib
+    ln -s -r $TARGET/usr/lib64 $TARGET/usr/lib
+
+    extract $required
+
+    for config in $(find $TARGET/etc -name "*.dpkg-new"); do
+        mv $config ${config%%.dpkg-new}
+    done
+
+    ln -s -r $TARGET/bin/bash $TARGET/bin/sh
+
+cat <<EOF > $TARGET/etc/locale.gen
+#ru_RU.UTF-8 UTF-8
+#ru_RU.KOI8-R KOI8-R
+en_US.UTF-8 UTF-8
+EOF
+}
+
+second_stage_install () {
+    dpkg --configure -a
+
+cat <<EOF >> $TARGET/etc/fstab
+proc    /proc   proc    nosuid,noexec,nodev 0   0
+sysfs   /sys    sysfs   nosuid,noexec,nodev 0   0
+EOF
+
+    sed -i 's/root::/root:Y4SW3wFiZ4dkY:/' $TARGET/etc/shadow
+    chmod 600 $TARGET/etc/shadow
+    name="osl"
+    sed -i "s/change-it/$name/" $TARGET/etc/sysconfig/network
+    sed -i '/agetty/d' $TARGET/etc/inittab
+    echo "deb [trusted=yes] $DEF_MIRROR $SUITE main" > $TARGET/etc/apt/sources.list
+
+    rm $TARGET/etc/rcsysinit.d/*mountfs \
+       $TARGET/etc/rcsysinit.d/*check_rootfs \
+       $TARGET/etc/rcsysinit.d/*checkfs
+}

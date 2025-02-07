@@ -2,7 +2,7 @@
 
 export SUITE="${SUITE#elbrus-linux-*}"
 
-default_mirror https://setwd.ws/osl/$SUITE
+default_mirror http://setwd.ws/osl/$SUITE
 mirror_style release
 download_style apt var-state
 

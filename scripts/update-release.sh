@@ -47,7 +47,7 @@ Label: Elbrus
 Suite: ${suite}
 Codename: ${codename}
 Version: ${version}
-Architectures: all ${arch_list[@]}
+Architectures: ${arch_list[@]}
 Components: ${component_list[@]}
 Description: Elbrus Linux software repository
 Date: $(date -Ru)

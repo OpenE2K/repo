@@ -53,9 +53,17 @@ Description: Elbrus Linux software repository
 Date: $(date -Ru)
 EOF
 
+    do_compress() {
+        for file in $(find -type f -name Packages); do
+            local file=$(echo ${file} | cut -c3-) # remove ./ prefix
+            gzip -9 -f -k ${file}
+            xz -9 -f -k ${file}
+        done
+    }
+
     do_hash_file() {
-        hash_cmd=$1
-        file=$2
+        local hash_cmd=$1
+        local file=$2
         echo " $(${hash_cmd} ${file} | cut -d' ' -f1) $(wc -c ${file})"
     }
 
@@ -64,16 +72,14 @@ EOF
         hash_cmd=$2
         echo "${hash_name}:"
         for file in $(find -type f -name Packages); do
-            file=$(echo ${file} | cut -c3-) # remove ./ prefix
-            if [ "${file}" = "Release" ]; then
-                continue
-            fi
+            local file=$(echo ${file} | cut -c3-) # remove ./ prefix
             do_hash_file ${hash_cmd} ${file}
-            gzip -9 -f -k ${file}
             do_hash_file ${hash_cmd} ${file}.gz
+            do_hash_file ${hash_cmd} ${file}.xz
         done
     }
 
+    do_compress
     do_hash "MD5Sum" "md5sum" >> ${release_file}
     do_hash "SHA1" "sha1sum" >> ${release_file}
     do_hash "SHA256" "sha256sum" >> ${release_file}

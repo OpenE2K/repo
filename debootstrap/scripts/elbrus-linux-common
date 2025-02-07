@@ -7,8 +7,7 @@ mirror_style release
 download_style apt var-state
 
 work_out_debs () {
-    #required="glibc distro-release dpkg apt ncurses zlib bash attr bzip2 readline diffutils linux-pam shadow libtirpc openssl cracklib lfs-bootscripts cpio util-linux kmod eudev file acl coreutils kbd gnupg e2fsprogs ed findutils gawk grep gzip hdparm less patch pciutils tar procps-ng sed sysklogd sysvinit time libusb libusb-compat usbutils which vim xz netbase libpcap popt m4 libffi python perl elfutils net-tools iproute2 openssh libssh2"
-    required="fs-init glibc dpkg apt ncurses zlib bash attr bzip2 readline diffutils shadow cracklib lfs-bootscripts cpio file acl coreutils ed findutils gawk grep gzip less tar sed sysklogd sysvinit time which xz popt m4 libffi net-tools"
+    required="fs-init glibc dpkg apt ncurses zlib bash attr bzip2 readline diffutils shadow cracklib lfs-bootscripts cpio file acl coreutils ed findutils gawk grep gzip less tar sed sysklogd sysvinit time which xz popt m4 libffi net-tools ca-certificates"
     case "$SUITE" in
         "3.0")
             ;;

@@ -18,10 +18,19 @@ work_out_debs () {
     esac
 }
 
-first_stage_install () {
-    # Workaround for duplicated files in packages.
-    EXTRACT_DEB_TAR_OPTIONS="$EXTRACT_DEB_TAR_OPTIONS --skip-old-files"
+# Workaround for duplicated files in packages.
+EXTRACTORS_SUPPORTED="dpkg"
 
+extract_dpkg_data () {
+    local pkg="$1"
+    dpkg --unpack --force-all --admindir=$TARGET/var/lib/dpkg --root=$TARGET "$pkg"
+}
+
+choose_extractor () {
+    extract_deb_data () { extract_dpkg_data "$@"; }
+}
+
+first_stage_install () {
     mkdir -p $TARGET/var/lib/dpkg/updates
     mkdir -p $TARGET/var/lib/dpkg/info
     touch $TARGET/var/lib/dpkg/status

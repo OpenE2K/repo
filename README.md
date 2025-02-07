@@ -7,6 +7,14 @@ cd qemu-e2k/build
 ../configure --target-list=e2k-linux-user --static --disable-capstone --disable-werror
 nice ninja qemu-e2k
 sudo cp qemu-e2k /usr/local/bin
+cd ..
+```
+
+# Clone this repository
+
+```sh
+git clone --depth=1 https://git.mentality.rip/OpenE2K/repo.git
+cd repo
 ```
 
 # Setup binfmt
@@ -43,8 +51,6 @@ echo ':qemu-e2k:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x
 # Install debootstrap scripts
 
 ```sh
-git clone --depth=1 https://git.mentality.rip/OpenE2K/repo.git
-cd repo
 sudo ln -svf $PWD/debootstrap/scripts/* /usr/share/debootstrap/scripts
 ```
 
@@ -71,8 +77,15 @@ sudo mkdir -p $TARGET/usr/local/bin
 sudo cp /usr/local/bin/qemu-e2k $TARGET/usr/local/bin/qemu-e2k
 ```
 
-Enter into the chroot and finish the instalation process.
+Finish the instalation process.
 
 ```sh
 PATH="/sbin:/usr/sbin:/bin:/usr/bin" sudo chroot $TARGET /debootstrap/debootstrap --second-stage
+```
+
+# Enter chroot
+
+```sh
+sudo cp -L /etc/resolv.conf $TARGET/etc/
+sudo chroot $TARGET /bin/bash
 ```

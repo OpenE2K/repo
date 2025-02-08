@@ -5,24 +5,45 @@ export SUITE="${SUITE#elbrus-linux-*}"
 default_mirror http://setwd.ws/osl/$SUITE
 mirror_style release
 download_style apt var-state
+variants - qemu
+# TODO:
+# keyring /path/to/setwd-archive-keyring.gpg
+
+if doing_variant qemu; then
+    if [ -e /usr/local/bin/qemu-e2k-static ]; then
+        QEMU_E2K_PATH=/usr/local/bin/qemu-e2k-static
+    elif [ -e /usr/bin/qemu-e2k-static ]; then
+        QEMU_E2K_PATH=/usr/bin/qemu-e2k-static
+    else
+        error 1 QEMUVARIANT "qemu-e2k-static is not found"
+    fi
+fi
 
 work_out_debs () {
-    required="fs-init glibc dpkg apt ncurses zlib bash attr bzip2 readline diffutils shadow cracklib lfs-bootscripts cpio file acl coreutils ed findutils gawk grep gzip less tar sed sysklogd sysvinit time which xz popt m4 libffi net-tools ca-certificates"
+    required="fs-init glibc dpkg apt bash diffutils file grep coreutils findutils gawk"
+    required="$required grep gzip less net-tools tar time sed shadow sysvinit which"
+
     case "$SUITE" in
         "3.0")
             ;;
         *)
-            required="$required distro-release eudev nano procps-ng"
+            required="$required distro-release nano procps-ng"
             ;;
+    esac
+
+    case $MIRRORS in
+        https://*)
+            # FIXME: https repository is broken
+            required="$required ca-certificates"
+        ;;
     esac
 }
 
-# Workaround for duplicated files in packages.
 EXTRACTORS_SUPPORTED="dpkg"
 
 extract_dpkg_data () {
     local pkg="$1"
-    dpkg --unpack --force-all --admindir=$TARGET/var/lib/dpkg --root=$TARGET "$pkg"
+    dpkg --unpack --force-all --admindir="$TARGET/var/lib/dpkg" --root="$TARGET" "$pkg"
 }
 
 choose_extractor () {
@@ -30,48 +51,86 @@ choose_extractor () {
 }
 
 first_stage_install () {
-    mkdir -p $TARGET/var/lib/dpkg/updates
-    mkdir -p $TARGET/var/lib/dpkg/info
-    touch $TARGET/var/lib/dpkg/status
-    touch $TARGET/var/lib/dpkg/available
+    extract fs-init
+    extract $(without "$required" "fs-init")
 
-    mkdir $TARGET/lib64
-    mkdir -p $TARGET/usr/lib64
-    ln -s -r $TARGET/lib64 $TARGET/lib
-    ln -s -r $TARGET/usr/lib64 $TARGET/usr/lib
+    mkdir -p "$TARGET/var/lib/dpkg/updates"
+    mkdir -p "$TARGET/var/lib/dpkg/info"
+    touch "$TARGET/var/lib/dpkg/status"
+    touch "$TARGET/var/lib/dpkg/available"
 
-    extract $required
-
-    for config in $(find $TARGET/etc -name "*.dpkg-new"); do
-        mv $config ${config%%.dpkg-new}
+    for config in $(find "$TARGET/etc" -name "*.dpkg-new"); do
+        mv "$config" "${config%%.dpkg-new}"
     done
 
-    ln -s -r $TARGET/bin/bash $TARGET/bin/sh
+    setup_etc
+    if [ ! -e "$TARGET/etc/fstab" ]; then
+        echo '# UNCONFIGURED FSTAB FOR BASE SYSTEM' > "$TARGET/etc/fstab"
+        chown 0:0 "$TARGET/etc/fstab"; chmod 644 "$TARGET/etc/fstab"
+    fi
 
-cat <<EOF > $TARGET/etc/locale.gen
+    # FIXME: default repository is not signed yet
+    sed -i "s@$DEF_MIRROR@[trusted=yes] &@" "$TARGET/etc/apt/sources.list"
+
+cat <<EOF > "$TARGET/etc/locale.gen"
 #ru_RU.UTF-8 UTF-8
 #ru_RU.KOI8-R KOI8-R
 en_US.UTF-8 UTF-8
 EOF
+
+    setup_devices
+
+    ln -s bash "$TARGET/bin/sh"
+
+    # create directory for qemu-e2k binary
+    mkdir -p "$TARGET/usr/local/bin"
+
+    if doing_variant qemu; then
+        cp "$QEMU_E2K_PATH" "$TARGET/usr/local/bin/qemu-e2k-static"
+        ln -s qemu-e2k-static "$TARGET/usr/local/bin/qemu-e2k"
+
+        echo $ARCH > "$TARGET/etc/debian_chroot"
+    fi
 }
 
 second_stage_install () {
-    dpkg --configure -a
+    in_target /bin/true
 
-cat <<EOF >> $TARGET/etc/fstab
-proc    /proc   proc    nosuid,noexec,nodev 0   0
-sysfs   /sys    sysfs   nosuid,noexec,nodev 0   0
-EOF
+    setup_dynamic_devices
 
-    sed -i 's/root::/root:Y4SW3wFiZ4dkY:/' $TARGET/etc/shadow
-    chmod 600 $TARGET/etc/shadow
-    name="osl"
-    sed -i "s/change-it/$name/" $TARGET/etc/sysconfig/network
-    sed -i '/agetty/d' $TARGET/etc/inittab
-    echo "deb [trusted=yes] $DEF_MIRROR $SUITE main" > $TARGET/etc/apt/sources.list
+    setup_proc
+    in_target /sbin/ldconfig
 
-    rm -f \
-       $TARGET/etc/rcsysinit.d/*mountfs \
-       $TARGET/etc/rcsysinit.d/*check_rootfs \
-       $TARGET/etc/rcsysinit.d/*checkfs
+    if [ ! -e "$TARGET/etc/localtime" ]; then
+        ln -sf /usr/share/zoneinfo/UTC "$TARGET/etc/localtime"
+    fi
+
+    DEBIAN_FRONTEND=noninteractive
+    DEBCONF_NONINTERACTIVE_SEEN=true
+    export DEBIAN_FRONTEND DEBCONF_NONINTERACTIVE_SEEN
+
+    baseprog=0
+    bases=$(set -- $required; echo $#)
+
+    exec 7>&1
+
+    info CONFREQ "Configuring required packages..."
+
+    [ -f "$TARGET/sbin/service" ] && mv "$TARGET/sbin/service" "$TARGET/sbin/service.REAL"
+    echo \
+"#!/bin/sh
+echo
+echo \"Warning: Fake service called, doing nothing\"" > "$TARGET/sbin/service"
+    chmod 755 "$TARGET/sbin/service"
+
+    setup_dselect_method apt
+
+    smallyes '' |
+        (in_target_failmsg CONF_REQ_FAIL "Failure while configuring required packages." "" \
+        dpkg --status-fd 8 --configure --pending --force-configure-any --force-depends 8>&1 1>&7 || echo EXITCODE $?) |
+        dpkg_progress $baseprog $bases CONFREQ "Configuring required packages" CONFIGURING
+
+    [ -f "$TARGET/sbin/service.REAL" ] && mv "$TARGET/sbin/service.REAL" "$TARGET/sbin/service"
+
+    info BASESUCCESS "Base system installed successfully."
 }

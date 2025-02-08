@@ -6,7 +6,8 @@ mkdir -p qemu-e2k/build
 cd qemu-e2k/build
 ../configure --target-list=e2k-linux-user --static --disable-capstone --disable-werror
 nice ninja qemu-e2k
-sudo cp qemu-e2k /usr/local/bin
+sudo cp qemu-e2k /usr/local/bin/qemu-e2k-static
+sudo ln -s qemu-e2k-static /usr/local/bin/qemu-e2k
 cd ..
 ```
 
@@ -51,7 +52,7 @@ echo ':qemu-e2k:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x
 # Install debootstrap scripts
 
 ```sh
-sudo ln -svf $PWD/debootstrap/scripts/* /usr/share/debootstrap/scripts
+sudo ln -svf "$PWD/debootstrap/scripts"/* /usr/share/debootstrap/scripts
 ```
 
 # Setup chroot
@@ -63,29 +64,22 @@ Prepare a chroot directory.
 ```sh
 # Set path to chroot directory
 export TARGET=/elbrus
-sudo mkdir -p $TARGET
 # Fetch and extract packages from remote repository
-sudo debootstrap --foreign --arch=e2k-8c elbrus-linux-8.2 $TARGET
+sudo debootstrap --foreign --variant=qemu --arch=e2k-8c elbrus-linux-8.2 "$TARGET"
 ```
 
 ## Second stage
 
-Copy the qemu-e2k static binary to the chroot directory.
-
-```sh
-sudo mkdir -p $TARGET/usr/local/bin
-sudo cp /usr/local/bin/qemu-e2k $TARGET/usr/local/bin/qemu-e2k
-```
-
 Finish the instalation process.
 
 ```sh
-PATH="/sbin:/usr/sbin:/bin:/usr/bin" sudo chroot $TARGET /debootstrap/debootstrap --second-stage
+# It will take a while because elbrus emulation is not an easy task.
+PATH="/sbin:/usr/sbin:/bin:/usr/bin" sudo chroot "$TARGET" /debootstrap/debootstrap --second-stage
 ```
 
 # Enter chroot
 
 ```sh
-sudo cp -L /etc/resolv.conf $TARGET/etc/
-sudo chroot $TARGET /bin/bash
+# TODO: mount partitions
+sudo chroot "$TARGET" /bin/bash
 ```

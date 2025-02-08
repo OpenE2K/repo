@@ -69,9 +69,6 @@ first_stage_install () {
         chown 0:0 "$TARGET/etc/fstab"; chmod 644 "$TARGET/etc/fstab"
     fi
 
-    # FIXME: default repository is not signed yet
-    sed -i "s@$DEF_MIRROR@[trusted=yes] &@" "$TARGET/etc/apt/sources.list"
-
 cat <<EOF > "$TARGET/etc/locale.gen"
 #ru_RU.UTF-8 UTF-8
 #ru_RU.KOI8-R KOI8-R
@@ -100,6 +97,9 @@ second_stage_install () {
 
     setup_proc
     in_target /sbin/ldconfig
+
+    # FIXME: default repository is not signed yet
+    sed -i "s@$DEF_MIRROR@[trusted=yes] &@" "$TARGET/etc/apt/sources.list"
 
     if [ ! -e "$TARGET/etc/localtime" ]; then
         ln -sf /usr/share/zoneinfo/UTC "$TARGET/etc/localtime"

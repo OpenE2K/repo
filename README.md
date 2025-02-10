@@ -83,3 +83,22 @@ PATH="/sbin:/usr/sbin:/bin:/usr/bin" sudo chroot "$TARGET" /debootstrap/debootst
 # TODO: mount partitions
 sudo chroot "$TARGET" /bin/bash
 ```
+
+# Run on Docker
+
+Before start check binfmt configuration above on your system
+
+```sh
+docker build -t elbrus .
+```
+
+Build qemu from commit --build-arg COMMIT=<hash>
+Extract another version of distro --build-arg ELBRUS=<version>
+
+Run container
+
+```sh
+docker run -it --rm elbrus bash
+03c968b2de3b / # uname -im
+e2k QEMU
+```

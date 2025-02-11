@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM qemu-e2k AS qemu-e2k
+FROM numas13/qemu-e2k AS qemu-e2k
 
 FROM ubuntu:latest AS build
 RUN apt-get update && \

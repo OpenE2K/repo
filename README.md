@@ -1,7 +1,7 @@
 # Compile QEMU with E2K support
 
 ```sh
-git clone --depth=1 -b e2k https://git.mentality.rip/OpenE2K/qemu-e2k.git
+git clone --depth=1 -b e2k https://github.com/OpenE2K/qemu-e2k.git
 mkdir -p qemu-e2k/build
 cd qemu-e2k/build
 ../configure --target-list=e2k-linux-user --static --disable-capstone --disable-werror
@@ -14,7 +14,7 @@ cd ..
 # Clone this repository
 
 ```sh
-git clone --depth=1 https://git.mentality.rip/OpenE2K/repo.git
+git clone --depth=1 https://github.com/OpenE2K/repo.git
 cd repo
 ```
 

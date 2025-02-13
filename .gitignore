@@ -1,1 +1,4 @@
 /osl
+/docker/elbrus-linux/cache/
+/docker/elbrus-linux/fs/
+/docker/elbrus-linux/dist/

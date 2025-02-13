@@ -20,7 +20,7 @@ if doing_variant qemu; then
 fi
 
 work_out_debs () {
-    required="fs-init glibc dpkg apt bash diffutils file grep coreutils findutils gawk"
+    required="fs-init glibc dpkg apt bash diffutils file coreutils findutils gawk"
     required="$required grep gzip less net-tools tar time sed shadow sysvinit which"
 
     case "$SUITE" in

@@ -46,7 +46,7 @@ sudo systemctl restart systemd-binfmt.service
 ```sh
 [ -d /proc/sys/fs/binfmt_misc ] || sudo modprobe binfmt_misc
 [ -f /proc/sys/fs/binfmt_misc/register ] || sudo mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
-echo ':qemu-e2k:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xaf\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/local/bin/qemu-e2k:OC' | sudo tee /proc/sys/fs/binfmt_misc/register
+echo ':qemu-e2k:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xaf\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/local/bin/qemu-e2k:OCF' | sudo tee /proc/sys/fs/binfmt_misc/register
 ```
 
 # Install debootstrap scripts

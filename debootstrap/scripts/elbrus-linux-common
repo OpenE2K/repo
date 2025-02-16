@@ -2,7 +2,7 @@
 
 export SUITE="${SUITE#elbrus-linux-*}"
 
-default_mirror http://setwd.ws/osl/$SUITE
+default_mirror https://setwd.ws/osl/$SUITE
 mirror_style release
 download_style apt var-state
 variants - qemu
@@ -33,7 +33,6 @@ work_out_debs () {
 
     case $MIRRORS in
         https://*)
-            # FIXME: https repository is broken
             required="$required ca-certificates"
         ;;
     esac
@@ -88,6 +87,10 @@ EOF
 
         echo $ARCH > "$TARGET/etc/debian_chroot"
     fi
+
+    # gnutls in OSL is compiled without support for adding system sertificates.
+    echo 'Acquire::https::CAInfo "/etc/ssl/certs/ca-certificates.crt";' \
+        > "$TARGET/etc/apt/apt.cond.d/trust-system-certs.conf"
 }
 
 second_stage_install () {

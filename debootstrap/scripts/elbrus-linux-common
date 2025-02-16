@@ -90,7 +90,7 @@ EOF
 
     # gnutls in OSL is compiled without support for adding system sertificates.
     echo 'Acquire::https::CAInfo "/etc/ssl/certs/ca-certificates.crt";' \
-        > "$TARGET/etc/apt/apt.cond.d/trust-system-certs.conf"
+        > "$TARGET/etc/apt/apt.conf.d/trust-system-certs.conf"
 }
 
 second_stage_install () {

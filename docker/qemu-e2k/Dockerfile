@@ -17,5 +17,9 @@ RUN ninja qemu-e2k && \
     mv qemu-e2k /qemu-e2k-static && \
     ninja clean
 
-FROM scratch
-COPY --from=build /qemu-e2k-static /
+FROM alpine
+COPY --from=build /qemu-e2k-static /usr/local/bin/
+RUN ln -s qemu-e2k-static /usr/local/bin/qemu-e2k
+COPY binfmt.sh /usr/local/bin/
+COPY binfmt.d /etc/binfmt.d/
+ENTRYPOINT ["binfmt.sh"]

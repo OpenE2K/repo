@@ -65,7 +65,7 @@ Prepare a chroot directory.
 # Set path to chroot directory
 export TARGET=/elbrus
 # Fetch and extract packages from remote repository
-sudo debootstrap --foreign --variant=qemu --arch=e2k-8c elbrus-linux-8.2 "$TARGET"
+sudo debootstrap --foreign --arch=e2k-8c elbrus-linux-8.2 "$TARGET"
 ```
 
 ## Second stage

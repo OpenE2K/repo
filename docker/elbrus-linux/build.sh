@@ -53,7 +53,7 @@ case $COMMAND in
             --exclude "./var/cache/*" \
             --exclude "./var/tmp/*" \
             --exclude "./tmp/*" \
-            --exclude "./usr/local/bin/qemu-e2k-*" \
+            --exclude "./usr/local/bin/qemu-e2k*" \
             .
         ;;
     "clean")

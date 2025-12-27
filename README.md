@@ -6,7 +6,7 @@
 git clone --depth=1 -b e2k https://github.com/OpenE2K/qemu-e2k.git
 mkdir -p qemu-e2k/build
 cd qemu-e2k/build
-../configure --target-list=e2k-linux-user --static --disable-capstone --disable-werror
+../configure --target-list=e2k-linux-user --static --disable-capstone --disable-werror --disable-docs
 nice ninja qemu-e2k
 sudo cp qemu-e2k /usr/local/bin/qemu-e2k-static
 sudo ln -s qemu-e2k-static /usr/local/bin/qemu-e2k
@@ -19,7 +19,7 @@ cd ..
 git clone --depth=1 -b mcst https://git.openelbrus.ru/mcst/qemu
 mkdir -p qemu-e2k/build
 cd qemu-e2k/build
-../configure --target-list=e2k-linux-user --static --disable-capstone --disable-werror
+../configure --target-list=e2k-linux-user --static --disable-capstone --disable-werror --disable-docs
 nice ninja qemu-e2k
 sudo cp qemu-e2k /usr/local/bin/qemu-e2k-static
 sudo ln -s qemu-e2k-static /usr/local/bin/qemu-e2k
@@ -51,8 +51,19 @@ CONFIG_BINFMT_MISC=m
 
 ## systemd
 
+### OpenE2K's qemu-e2k
+
 ```sh
-sudo cp binfmt.d/qemu-e2k.conf /etc/binfmt.d/qemu-e2k.conf
+sudo cp binfmt.d/qemu-e2k-*.conf /etc/binfmt.d/
+sudo systemctl restart systemd-binfmt.service
+```
+
+### MCST's qemu-e2k
+
+As MCST's qemu-e2k only supports e2k-64 without check for very old binaries, you can install only `qemu-e2k-64.conf`
+
+```sh
+sudo cp binfmt.d/qemu-e2k-64.conf /etc/binfmt.d/
 sudo systemctl restart systemd-binfmt.service
 ```
 

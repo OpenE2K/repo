@@ -1,7 +1,22 @@
 # Compile QEMU with E2K support
 
+### OpenE2K's qemu-e2k:
+
 ```sh
 git clone --depth=1 -b e2k https://github.com/OpenE2K/qemu-e2k.git
+mkdir -p qemu-e2k/build
+cd qemu-e2k/build
+../configure --target-list=e2k-linux-user --static --disable-capstone --disable-werror
+nice ninja qemu-e2k
+sudo cp qemu-e2k /usr/local/bin/qemu-e2k-static
+sudo ln -s qemu-e2k-static /usr/local/bin/qemu-e2k
+cd ..
+```
+
+### MCST's qemu-e2k:
+
+```sh
+git clone --depth=1 -b mcst https://git.openelbrus.ru/mcst/qemu
 mkdir -p qemu-e2k/build
 cd qemu-e2k/build
 ../configure --target-list=e2k-linux-user --static --disable-capstone --disable-werror
